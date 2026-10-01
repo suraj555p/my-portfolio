@@ -1,6 +1,8 @@
 "use client";
 
-import { type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { motion, useReducedMotion } from "motion/react";
 import {
   Mail,
@@ -11,15 +13,6 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { FaGithub, FaLinkedin, FaInstagram, FaYoutube } from "react-icons/fa";
-
-/**
- * Contact section — dark navy + blue/purple gradient theme.
- * Drop this in as app/components/GetInTouch.tsx and use <GetInTouch /> on your page.
- *
- * Layout:
- *  - Mobile  : single column (intro + details, then the form, then footer)
- *  - Desktop : two columns (intro + details on the left, form on the right)
- */
 
 const CONTACTS = [
   {
@@ -42,12 +35,9 @@ const CONTACTS = [
   },
 ];
 
-// TODO: replace the "#" links with your real profile URLs
 const SOCIALS = [
   { icon: FaGithub, label: "GitHub", href: "https://github.com/suraj555p" },
-  { icon: FaLinkedin, label: "LinkedIn", href: "#" },
-  { icon: FaInstagram, label: "Instagram", href: "#" },
-  { icon: FaYoutube, label: "YouTube", href: "#" },
+  { icon: FaLinkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/suraj-parmar-0326a02aa/?isSelfProfile=true" },
 ];
 
 const inputClass =
@@ -55,24 +45,83 @@ const inputClass =
 
 const labelClass = "mb-1.5 block text-sm font-medium text-slate-300";
 
+const initialForm = {
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+};
+
 export default function GetInTouch() {
   const reduceMotion = useReducedMotion();
   const offset = reduceMotion ? 0 : 30;
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const [formData, setFormData] = useState(initialForm);
+  const [isLoading, setIsLoading] = useState(false);
+
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    // TODO: send `data` to your API route / email service here
-    console.log(Object.fromEntries(data));
+    setIsLoading(true);
+
+    const toastId = toast.loading("Sending your message...");
+
+    try {
+      const res = await axios.post("/api/contact", formData);
+
+      if (res.data.success) {
+        toast.success("Your message has been sent! I will reply soon.", {
+          id: toastId,
+        });
+        setFormData(initialForm);
+      } else {
+        toast.error("Failed to send your message. Please try again.", {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      let message = "Failed to send your message. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.error || message;
+      }
+
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative overflow-hidden bg-[#050a12] px-5 py-16 text-white sm:px-8 sm:py-20 lg:px-12 lg:py-24"
+      className="relative overflow-hidden  bg-[#0b0b12] px-5 py-16 text-white sm:px-8 sm:py-20 lg:px-12 lg:py-24"
     >
-      {/* Background glow (decorative) */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#0f172a",
+            color: "#e2e8f0",
+            border: "1px solid #334155",
+          },
+          success: {
+            iconTheme: { primary: "#10b981", secondary: "#0f172a" },
+          },
+          error: {
+            iconTheme: { primary: "#ef4444", secondary: "#0f172a" },
+          },
+        }}
+      />
+
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -left-40 top-10 h-80 w-80 rounded-full bg-blue-600/10 blur-[110px]"
@@ -84,20 +133,17 @@ export default function GetInTouch() {
 
       <div className="relative mx-auto max-w-6xl">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* ---------- Left side ---------- */}
           <motion.div
             initial={{ opacity: 0, x: -offset }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: reduceMotion ? 0 : 0.6 }}
           >
-            {/* Badge */}
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/5 px-3 py-1.5 text-xs text-blue-300 sm:text-sm">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
               Open to work and freelance projects
             </div>
 
-            {/* Heading */}
             <h2
               id="contact-heading"
               className="text-4xl font-bold leading-tight sm:text-5xl"
@@ -113,7 +159,6 @@ export default function GetInTouch() {
               Send me a message and I&apos;ll reply as soon as I can.
             </p>
 
-            {/* Contact details */}
             <ul className="mt-8 space-y-5">
               {CONTACTS.map(({ icon: Icon, label, value, href }) => (
                 <li key={label} className="flex items-start gap-4">
@@ -140,7 +185,6 @@ export default function GetInTouch() {
               ))}
             </ul>
 
-            {/* Socials */}
             <div className="mt-8 border-t border-slate-800 pt-6">
               <h3 className="text-base font-semibold">Find me online</h3>
 
@@ -162,7 +206,6 @@ export default function GetInTouch() {
               </ul>
             </div>
 
-            {/* Signature */}
             <p className="mt-8 origin-left -rotate-3 font-serif text-xl italic leading-snug text-blue-400 sm:text-2xl">
               Let&apos;s build
               <br />
@@ -170,7 +213,6 @@ export default function GetInTouch() {
             </p>
           </motion.div>
 
-          {/* ---------- Right side: form ---------- */}
           <motion.div
             initial={{ opacity: 0, x: offset }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -185,7 +227,6 @@ export default function GetInTouch() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              {/* Name + Email */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="name" className={labelClass}>
@@ -198,6 +239,8 @@ export default function GetInTouch() {
                     required
                     autoComplete="name"
                     placeholder="Your name"
+                    value={formData.name}
+                    onChange={handleChange}
                     className={inputClass}
                   />
                 </div>
@@ -213,12 +256,13 @@ export default function GetInTouch() {
                     required
                     autoComplete="email"
                     placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
                     className={inputClass}
                   />
                 </div>
               </div>
 
-              {/* Subject */}
               <div>
                 <label htmlFor="subject" className={labelClass}>
                   Subject *
@@ -229,11 +273,12 @@ export default function GetInTouch() {
                   type="text"
                   required
                   placeholder="What is this about?"
+                  value={formData.subject}
+                  onChange={handleChange}
                   className={inputClass}
                 />
               </div>
 
-              {/* Message */}
               <div>
                 <label htmlFor="message" className={labelClass}>
                   Message *
@@ -244,22 +289,23 @@ export default function GetInTouch() {
                   rows={5}
                   required
                   placeholder="Tell me about your project or opportunity..."
+                  value={formData.message}
+                  onChange={handleChange}
                   className={`${inputClass} resize-none`}
                 />
               </div>
 
-              {/* Button */}
               <motion.button
                 whileHover={reduceMotion ? undefined : { scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
+                disabled={isLoading}
                 className="flex w-full items-center justify-center gap-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-base font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:shadow-blue-500/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
               >
                 <Send size={18} aria-hidden="true" />
                 Send message
               </motion.button>
 
-              {/* Privacy note */}
               <p className="flex items-center justify-center gap-2 pt-1 text-xs text-slate-500">
                 <ShieldCheck size={14} aria-hidden="true" />
                 Your details are only used to reply to you.
@@ -268,7 +314,6 @@ export default function GetInTouch() {
           </motion.div>
         </div>
 
-        {/* ---------- Footer ---------- */}
         <footer className="mt-14 border-t border-slate-800 pt-6 sm:mt-16">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">

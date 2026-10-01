@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import type { ProjectData } from "./Project";
+import { FaGithub } from "react-icons/fa";
 
 interface ProjectCardProps {
   projects: ProjectData[];
@@ -11,10 +12,8 @@ function ProjectCard({ projects }: ProjectCardProps) {
   return (
     <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
       {projects.map((project, index) => (
-        <motion.a
+        <motion.div
           key={project.name}
-          href={project.link}
-          target="_blank"
           rel="noopener noreferrer"
           // Each card animates when IT enters the screen (works well on tall mobile layouts)
           initial={{ opacity: 0, y: 30 }}
@@ -44,14 +43,32 @@ function ProjectCard({ projects }: ProjectCardProps) {
             <p className="mb-4 text-sm leading-relaxed text-[#9a94ab] sm:text-base">
               {project.description}
             </p>
-            <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-[#a78bfa] group-hover:text-[#c4b5fd]">
+
+            <div className="mt-auto flex items-center justify-between gap-4">
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-[#a78bfa] group-hover:text-[#c4b5fd]"
+            >
               View Project
               <span className="transition-transform group-hover:translate-x-1">
                 →
               </span>
-            </span>
+            </a>
+            <div>
+               <a
+                 href={project.github}
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[#a78bfa] group-hover:text-[#c4b5fd]"
+               >
+                 <FaGithub className="text-[#a78bfa] hover:text-[#c4b5fd]" />
+               </a>
+            </div>
+            </div>
           </div>
-        </motion.a>
+        </motion.div>
       ))}
     </div>
   );

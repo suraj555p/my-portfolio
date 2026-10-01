@@ -8,6 +8,7 @@ export interface ProjectData {
   projectImage: string;
   description: string;
   link: string;
+  github?: string;
 }
 
 const projects: ProjectData[] = [
@@ -17,6 +18,7 @@ const projects: ProjectData[] = [
     description:
       "Production-level full-stack quiz app built with Next.js, Prisma, PostgreSQL, Tailwind CSS and Clerk authentication. Follows an exam-paper metaphor with separate admin and student roles for creating and attempting quizzes.",
     link: "https://online-quiz-app-zeta.vercel.app/",
+    github: "https://github.com/suraj555p/Quiz-app"
   },
   {
     name: "Socially",
@@ -24,6 +26,7 @@ const projects: ProjectData[] = [
     description:
       "A full-stack social media app built with Next.js where users can create posts in image or video format and share short-form reels — with a dedicated feed to upload and watch them.",
     link: "https://sociallly-next-js-mrtx.vercel.app/",
+    github: "https://github.com/suraj555p/Sociallly-Next-Js"
   },
   {
     name: "Videotube",
@@ -31,6 +34,7 @@ const projects: ProjectData[] = [
     description:
       "A full-stack video-sharing platform built with the MERN stack (MongoDB, Express, React, Node.js), letting users upload, browse and watch videos in a YouTube-style experience.",
     link: "https://vt-frontend-ebon.vercel.app/",
+    github: "https://github.com/suraj555p/VT-frontend"
   },
 ];
 
